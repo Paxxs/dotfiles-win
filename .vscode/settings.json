@@ -1,0 +1,31 @@
+{
+    "powershell.scriptAnalysis.enable": true,
+    "powershell.developer.editorServicesLogLevel": "Verbose",
+    "powershell.startAutomatically": true,
+    "powershell.integratedConsole.focusConsoleOnExecute": false,
+    "cSpell.words": [
+        "baseconf",
+        "env",
+        "vimrc",
+        "windir",
+        "Cblue",
+        "Cgreen",
+        "Creset",
+        "FOLDERID",
+        "Myip",
+        "Readline",
+        "currentversion",
+        "endregion",
+        "ggaa",
+        "ggai",
+        "ggca",
+        "ggcaa",
+        "ggds",
+        "ggll",
+        "ggpf",
+        "ggroot",
+        "gurl",
+        "ipinfo",
+        "toplevel"
+    ]
+}
