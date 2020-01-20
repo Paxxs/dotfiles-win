@@ -30,3 +30,10 @@ function Update-System {
 function Get-Myip {
     Invoke-RestMethod -Uri ('https://ipinfo.io/')
 }
+function CreateAndSetDir {
+    param (
+        [string]$path
+    )
+    New-Item -Path $path -ItemType Directory -ErrorAction SilentlyContinue
+    Set-Location $path
+}
