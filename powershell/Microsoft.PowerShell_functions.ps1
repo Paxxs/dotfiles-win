@@ -20,8 +20,12 @@ function Edit-Profile {
 function Update-System {
     # require administrator
     # https://www.powershellgallery.com/packages/PSWindowsUpdate/2.1.1.2
-    Invoke-Expression "$(if (-not $(IsAdmin)) {'sudo '})Install-WindowsUpdate -IgnoreUserInput -IgnoreReboot -AcceptAll"
-    Invoke-Expression "scoop update"
+    if (Get-Command -Module PSWindowsUpdate) {
+        Invoke-Expression "$(if (-not $(IsAdmin)) {'sudo '})Install-WindowsUpdate -IgnoreUserInput -IgnoreReboot -AcceptAll"
+    }
+    if (Get-Command scoop1 -ErrorAction SilentlyContinue) {
+        Invoke-Expression "scoop update"
+    }
     Update-Module
     Update-Help
 }
