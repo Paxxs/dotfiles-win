@@ -106,10 +106,7 @@ function DownloadFile {
         # download
         $IsDownload = $false
         try {
-            $wc = New-Object System.Net.WebClient
-            $wc.headers.add('Referer', (strip_filename $url))
-            $wc.Headers.Add('User-Agent', (Get-UserAgent))
-            $wc.DownloadFile($url, $target)
+            (New-Object System.Net.WebClient).DownloadFile($url, $target)
         }
         catch {
             Write-Error $_
