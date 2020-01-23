@@ -408,6 +408,8 @@ if ($level -ge $LevelMinimal) {
         # InsScoop -appsName $_
         InsScoop -appsName $_ -isCore $true
     }
+    # To get Git to recognise OpenSSH
+    [environment]::setenvironmentvariable('GIT_SSH', (resolve-path (scoop which ssh)), 'USER')
 }
 
 Write-Title "Clone scoop Bucket"
