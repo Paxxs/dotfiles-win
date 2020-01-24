@@ -364,21 +364,24 @@ if ($level -ge $LevelMinimal) {
     Write-Title "Stow powershell legacy profile"
     StowFile $Global:profile "$dir\powershell\Microsoft.PowerShell_profile.ps1"
 
-    Write-Title "Install scoop"
-    $customScoop = TimeoutPrompt "Press key to intervene in scoop installer" 5
-    if ($customScoop) {
-        $scoopDir = Read-Host "Where do u want to install (Enter: default)"
-        if ($scoopDir) {
-            [System.Environment]::setEnvironmentVariable('SCOOP', $scoopDir, 'User')
-            $env:SCOOP = $scoopDir # with this we don't need to close and reopen the console
+    # scoop 如果安装了整个流程就gg，判断一下
+    if (!(Get-Command scoop)) {
+        Write-Title "Install scoop"
+        $customScoop = TimeoutPrompt "Press key to intervene in scoop installer" 5
+        if ($customScoop) {
+            $scoopDir = Read-Host "Where do u want to install (Enter: default)"
+            if ($scoopDir) {
+                [System.Environment]::setEnvironmentVariable('SCOOP', $scoopDir, 'User')
+                $env:SCOOP = $scoopDir # with this we don't need to close and reopen the console
+            }
+            $scoopGlobalDir = Read-Host "Set global installation to custom directory (Enter: default)"
+            if ($scoopGlobalDir) {
+                [System.Environment]::setEnvironmentVariable('SCOOP_GLOBAL', $scoopGlobalDir, 'Machine')
+                $env:SCOOP_GLOBAL = $scoopGlobalDir
+            }
         }
-        $scoopGlobalDir = Read-Host "Set global installation to custom directory (Enter: default)"
-        if ($scoopGlobalDir) {
-            [System.Environment]::setEnvironmentVariable('SCOOP_GLOBAL', $scoopGlobalDir, 'Machine')
-            $env:SCOOP_GLOBAL = $scoopGlobalDir
-        }
+        Invoke-Expression (new-object net.webclient).downloadstring('https://get.scoop.sh')
     }
-    Invoke-Expression (new-object net.webclient).downloadstring('https://get.scoop.sh')
 
     Write-Output "configure scoop alias..."
     scoop alias add S 'scoop install $args[0]' 'Install apps'
@@ -491,7 +494,7 @@ if ($level -ge $LevelBasic) {
         "extras/everything",
         "nerd-fonts/FantasqueSansMono-NF",
         "MorFans/FastCopy-M",
-        "MorFans/filezilla",
+        "MorFans/Filezilla-persist",
         "nerd-fonts/FiraCode",
         "nerd-fonts/FiraMono-NF",
         "main/frp",
@@ -511,7 +514,7 @@ if ($level -ge $LevelBasic) {
         "extras/v2rayN",
         "winPython"
     ) | ForEach-Object {
-        InsScoop -appsName $_ -isCore $true
+        InsScoop -appsName $_
     }
 }
 if ($level -ge $levelFull) {
@@ -519,7 +522,7 @@ if ($level -ge $levelFull) {
     $app_list = @(
         # "MorFans/AliWangWang",
         "portableapps/authy-desktop",
-        "MorFans/bingdian",
+        # "MorFans/bingdian",
         "dorado/chfs",
         "ffmpeg",
         "MorFans/FFRenamePro",
@@ -528,12 +531,12 @@ if ($level -ge $levelFull) {
         "extras/googlechrome-dev",
         "dorado/hmcl",
         "MorFans/IDA-Pro.64",
-        "MorFans/JJDown",
-        "MorFans/LDPlayer.clear",
+        # "MorFans/JJDown",
+        # "MorFans/LDPlayer.clear",
         # "dorado/magicavoxel",
-        "MorFans/mofang-PCMaster-full",
+        # "MorFans/mofang-PCMaster-full",
         "nmap",
-        "extras/obs-studio",
+        # "extras/obs-studio",
         "dorado/pandownload",
         "MorFans/potplayer-mini.64",
         "powertoys",
@@ -541,7 +544,7 @@ if ($level -ge $levelFull) {
         "nerd-fonts/SarasaGothic-ttc",
         "extras/screentogif",
         "syncthing",
-        "MorFans/tb-Toolbox",
+        # "MorFans/tb-Toolbox",
         "extras/tor-browser",
         "dorado/trafficmonitor",
         "extras/typora",
