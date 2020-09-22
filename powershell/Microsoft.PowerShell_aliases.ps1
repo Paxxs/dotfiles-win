@@ -40,7 +40,7 @@ ${function:scoops} = {scoop update; scoop status}
 
 #region function
 Set-Alias mkd CreateAndSetDir -Description "Create a new directory and enter it"
-Set-Alias update Update-System -Description "Update system, scoop, ruby Gems, ...(other packages)"
+# Set-Alias update Update-System -Description "Update system, scoop, ruby Gems, ...(other packages)"
 Set-Alias myip Get-Myip -Description "Get the public IP address through ipinfo.io"
 
 Set-Alias open Invoke-Item -Description "The Invoke-Item cmdlet performs the default action on the specified item"
