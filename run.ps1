@@ -35,7 +35,7 @@ Write-Output "Downloading..."
 (New-Object System.Net.WebClient).DownloadFile($bootstrap_url,"$bootstrap_dir\pxbootstrap.ps1")
 $level = Read-Host "Select level (Minimal/Basic/Full)"
 if (Test-Path "$bootstrap_dir\pxbootstrap.ps1") {
-    . "$bootstrap_dir\pxbootstrap.ps1" $level
+    . "$bootstrap_dir\pxbootstrap.ps1" -Plevel $level
     Write-Output "Remove bootstrap..."
     Remove-Item "$bootstrap_dir\pxbootstrap.ps1" -Force -ErrorAction Continue
 } else {
