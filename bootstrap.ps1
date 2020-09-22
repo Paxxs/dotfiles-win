@@ -363,8 +363,10 @@ Remove-Item "$dir\_tmp", $zip_file -Recurse -Force
 if ($level -ge $LevelMinimal) {
     Write-Title "Stow powershell legacy profile"
     StowFile $Global:profile "$dir\powershell\Microsoft.PowerShell_profile.ps1"
+}
 
-    # scoop 如果安装了整个流程就gg，判断一下
+if ($level -ge $LevelBasic) {
+    # Basic 级别安装 scoop，如果没有安装则安装
     if (!(Get-Command scoop)) {
         Write-Title "Install scoop"
         $customScoop = TimeoutPrompt "Press key to intervene in scoop installer" 5
@@ -395,48 +397,56 @@ if ($level -ge $LevelMinimal) {
     scoop alias add Fs 'scoop prefix $args[0]' 'Returns the path to the specified app'
 
     Write-Title "Install basic app..."
-    $app_list = @(
+    @(
         "git",
         "7zip",
-        "aria2",
-        "fzf",
-        "sudo"
-        "curl",
-        "sed",
-        "less",
-        "gpg",
-        "busybox",
-        "openssh"
+        "sudo",
+        "win32-openssh"
+        # "fzf",
     ) | ForEach-Object {
         # InsScoop -appsName $_
         InsScoop -appsName $_ -isCore $true
     }
+
+    @(
+        "busybox",
+        "curl",
+        "adb",
+        "shasum",
+        "gpg",
+        "neovim",
+        "connect",
+        "aria2"
+    ) | ForEach-Object {
+        InsScoop -appsName $_ -isCore $false
+    }
+
     # To get Git to recognise OpenSSH
     [environment]::setenvironmentvariable('GIT_SSH', (resolve-path (scoop which ssh)), 'USER')
-}
 
-Write-Title "Clone scoop Bucket"
-if ($level -ge $LevelMinimal) {
-    $bucket_list = @(
-        ("Extras bucket for Scoop", "extras"),
-        ("nonportable applications", "nonportable"),
-        ("Cluttered bucket", "MorFans", "https://github.com/Paxxs/Cluttered-bucket.git")
-    ) | ForEach-Object {
-        Write-Output "Cloning bucket: "$_[0]
-        if ([string]::IsNullOrWhiteSpace($_[2])) {
-            # official
-            AddScoopBucket -bu_name $_[1]
-        }
-        else {
-            AddScoopBucket -bu_name $_[1] -bu_url $_[2]
+    Write-Title "Clone scoop Bucket"
+    if ($level -ge $LevelMinimal) {
+        @(
+            ("Extras bucket for Scoop", "extras"),
+            ("nonportable applications", "nonportable"),
+            ("Cluttered bucket", "MorFans", "https://github.com/Paxxs/Cluttered-bucket.git"),
+            ("Installing nerd fonts", "nerd-fonts"),
+            ("versions", "versions")
+        ) | ForEach-Object {
+            Write-Output "Cloning bucket: "$_[0]
+            if ([string]::IsNullOrWhiteSpace($_[2])) {
+                # official
+                AddScoopBucket -bu_name $_[1]
+            }
+            else {
+                AddScoopBucket -bu_name $_[1] -bu_url $_[2]
+            }
         }
     }
-}
-if ($level -ge $LevelBasic) {
-    $bucket_list = @(
+    if ($level -ge $LevelBasic) {
+    @(
         ("JAVA Bucket", "java"),
-        ("PHP Bucket", "php"),
-        ("Installing nerd fonts", "nerd-fonts"),
+        # ("PHP Bucket", "php"),
         ("h404bi`s bucket", "dorado", "https://github.com/h404bi/dorado.git"),
         ("Ash258 Personal bucket", "Ash258", "https://github.com/Ash258/scoop-Ash258.git"),
         ("Reverse engineering tools", "retools", "https://github.com/TheCjw/scoop-retools.git"),
@@ -455,108 +465,128 @@ if ($level -ge $LevelBasic) {
         Write-Output "Cloning bucket: portableapps.com"
         AddScoopBucket -bu_name "portableapps" -bu_url "https://github.com/nickbudi/scoop-bucket.git"
     }
-}
+    }
 
+}
 
 
 Write-Title "Install PowerShell Module"
+# PowerShellGet requires NuGet provider version '2.8.5.201' or newer to interact with NuGet-based repositories
+Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
 if ($level -ge $LevelMinimal) {
     Write-Verbose "Install Module: posh-git"
     Install-Module posh-git -Scope CurrentUser -Force
-}
-if ($level -ge $LevelBasic) {
+
     Write-Verbose "Install Module: oh-my-posh"
     Install-Module oh-my-posh -Scope CurrentUser -Force
-    
     #  Administrator rights are required
+
     Write-Verbose "Install Module: Get-ChildItemColor"
-    Install-Module -AllowClobber Get-ChildItemColor -Force
-    
+    Install-Module -AllowClobber Get-ChildItemColor CurrentUser -Force
+}
+if ($level -ge $LevelBasic) {
     if(!(Get-Command z -ErrorAction SilentlyContinue)) {
         Write-Verbose "Install Module: z"
         Install-Module z -AllowClobber -Scope CurrentUser -Force
     }
-    
-    if(!(Get-Module PSFzf)) {
-        Write-Verbose "Install Module: PSFzf"
-        Install-Module -Name PSFzf -Force
-    }
+    # need the latest version of fzf.exe
+    # if(!(Get-Module PSFzf)) {
+    #     Write-Verbose "Install Module: PSFzf"
+    #     Install-Module -Name PSFzf -Force
+    # }
 }
 #endregion
 
 #region Install Software
 if ($level -ge $LevelBasic) {
     Write-Title "Install application..."
-    $app_list = @(
-        "extras/aria-ng-gui",
+    @(
         "extras/dismplusplus",
-        "extras/dnspy",
         "extras/everything",
-        "nerd-fonts/FantasqueSansMono-NF",
         "MorFans/FastCopy-M",
-        "MorFans/Filezilla-persist",
-        "nerd-fonts/FiraCode",
-        "nerd-fonts/FiraMono-NF",
         "main/frp",
-        "extras/gifcam",
-        "extras/joplin",
-        "extras/keeweb",
         "extras/locale-emulator",
-        "extras/mkcert",
-        "main/nodejs",
-        "ojdkbuild8-full",
-        "extras/postman",
         "extras/processhacker",
-        "extras/putty",
         "extras/resource-hacker",
-        "tcping",
         "MorFans/UAC.HashTab",
-        "extras/v2rayN",
-        "winPython"
+        "extras/aria-ng-gui",
+        "extras/autohotkey",
+        "extras/filezilla",
+        "fzf",
+        "MorFans/LightProxy",
+        "MorFans/Malware-Patch",
+        "MorFans/mclone",
+        "nvm",
+        "MorFans/ProjectEye",
+        "python",
+        "dorado/qtscrcpy",
+        "Ash258/potplayer",
+        "dorado/trafficmonitor",
+        "MorFans/UAC.PowerToys",
+        "MorFans/Windows.Auto.Night.Mode",
+        "dorado/clash-for-windows-portable",
+        "MorFans/UAC.Listary5.Third"
+        "nerd-fonts/Cascadia-Code",
+        "nerd-fonts/CascadiaCode-NF",
+        "Noto-NF",
+        "SarasaGothic-ttc",
+        "FiraCode-NF",
+        "FiraMono-NF"
     ) | ForEach-Object {
         InsScoop -appsName $_
     }
 }
 if ($level -ge $levelFull) {
     # Cspell:disable
-    $app_list = @(
+    @(
+        "extras/dnspy",
+        "extras/gifcam",
+        "extras/joplin",
+        "extras/keeweb",
+        # "extras/mkcert",
+        # "main/nodejs",
+        # "ojdkbuild8-full",
+        "extras/postman",
+        "extras/putty",
+        # "tcping",
+        "v2ray"
+        "extras/v2rayN",
+        "extras/authy",
+        # "winPython"
         # "MorFans/AliWangWang",
-        "portableapps/authy-desktop",
         # "MorFans/bingdian",
         "dorado/chfs",
         "ffmpeg",
         "MorFans/FFRenamePro",
         "fiddler",
-        "extras/format-factory",
-        "extras/googlechrome-dev",
-        "dorado/hmcl",
-        "MorFans/IDA-Pro.64",
+        # "extras/format-factory",
+        # "extras/googlechrome-dev",
+        # "dorado/hmcl",
+        # "MorFans/IDA-Pro.64",
         # "MorFans/JJDown",
         # "MorFans/LDPlayer.clear",
         # "dorado/magicavoxel",
         # "MorFans/mofang-PCMaster-full",
         "nmap",
         # "extras/obs-studio",
-        "dorado/pandownload",
-        "MorFans/potplayer-mini.64",
-        "powertoys",
         "extras/rufus",
-        "nerd-fonts/SarasaGothic-ttc",
+        # "nerd-fonts/SarasaGothic-ttc",
         "extras/screentogif",
         "syncthing",
         # "MorFans/tb-Toolbox",
         "extras/tor-browser",
-        "dorado/trafficmonitor",
-        "extras/typora",
-        "MorFans/UAC.Listary5.Third",
+        # "dorado/trafficmonitor",
+        # "extras/typora",
         # "MorFans/UAC.QQ_Portable",
         # "MorFans/UAC.ThunderX",
         # "MorFans/UAC.Xmind-8",
-        "MorFans/UAC.xshell6",
+        # "MorFans/UAC.xshell6",
         # "MorFans/UAC.YoudaoDict.Pure",
         # "MorFans/WeChat-Portable",
-        "MorFans/Windows.Auto.Night.Mode",
-        "extras/wireshark"
+        # "MorFans/Windows.Auto.Night.Mode",
+        "extras/wireshark",
+        "go",
+        "extras/bitwarden"
     ) | ForEach-Object {
         InsScoop -appsName $_
     }
